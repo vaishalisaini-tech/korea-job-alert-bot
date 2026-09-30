@@ -1,0 +1,93 @@
+# ---------------------------------------------------------------
+# Edit this file to control WHAT the bot looks for and WHERE.
+# ---------------------------------------------------------------
+
+filters:
+  # Job location must contain one of these (case-insensitive)
+  locations:
+    - korea
+    - seoul
+    - pangyo
+    - seongnam
+    - busan
+    - incheon
+    - gyeonggi
+    - 서울
+    - 판교
+    - 한국
+
+  # Job TITLE must contain at least one of these
+  title_include:
+    - devops
+    - sre
+    - site reliability
+    - platform engineer
+    - cloud
+    - infrastructure
+    - kubernetes
+    - automation
+    - network
+    - 데브옵스
+    - 인프라
+    - 클라우드
+    - 쿠버네티스
+
+  # ...and none of these
+  title_exclude:
+    - intern
+    - sales
+    - marketing
+    - recruiter
+    - director
+    - vp
+    - account
+    - legal
+    - finance
+
+  # true = silently hide jobs whose description says Korean is required.
+  # false (default) = still send them, but with a warning flag.
+  hide_if_korean_required: false
+
+# Max alerts sent on the very first run (so you aren't flooded)
+max_first_run_alerts: 30
+
+sources:
+  # Company job-board "tokens". Verify each by opening the URL in a browser, e.g.
+  #   https://boards-api.greenhouse.io/v1/boards/datadog/jobs
+  # If it returns JSON, the token is valid. Invalid ones just print a warning.
+  greenhouse:
+    - datadog
+    - cloudflare
+    - databricks
+    - mongodb
+    - gitlab
+    - twilio
+    - okta
+    - airbnb
+    - stripe
+
+  # https://api.lever.co/v0/postings/<company>?mode=json
+  lever:
+    - palantir
+
+  # https://api.ashbyhq.com/posting-api/job-board/<name>
+  ashby: []
+
+  # https://api.smartrecruiters.com/v1/companies/<id>/postings?country=kr
+  smartrecruiters: []
+
+  # Google Alerts RSS feeds (best way to cover Wanted / Saramin / LinkedIn / JobKorea):
+  #  1. google.com/alerts -> query e.g.  site:wanted.co.kr DevOps
+  #  2. "Show options" -> Deliver to: RSS feed -> Create alert
+  #  3. Right-click the RSS icon -> copy link -> paste below
+  rss: []
+  #  - name: Wanted DevOps
+  #    url: "https://www.google.com/alerts/feeds/XXXX/YYYY"
+  #  - name: LinkedIn Korea DevOps
+  #    url: "https://www.google.com/alerts/feeds/XXXX/ZZZZ"
+
+  # Static careers pages: bot alerts when the page text changes.
+  # Works only for pages that are NOT heavily JavaScript-rendered.
+  pages: []
+  #  - name: Some Company Careers
+  #    url: "https://example.com/careers"
