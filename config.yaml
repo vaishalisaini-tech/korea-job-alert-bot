@@ -1,6 +1,6 @@
 # =====================================================================
 # Korea Job Search Agent - configuration
-# Profile: 4+ yrs DevOps / Infrastructure & Network Automation (Python,
+# Profile: 5 yrs DevOps / Infrastructure & Network Automation (Python,
 # Kubernetes/GKE, Terraform, CI/CD, Prometheus/Grafana, AI-SRE).
 # =====================================================================
 
@@ -209,14 +209,21 @@ scoring:
   good: 50
   reasonable: 35
 
-# ---------------- EXPERIENCE (yours: 4+ years) -----------------------
+# ---------------- EXPERIENCE (yours: 5 years) ------------------------
 experience:
-  mine: 4
-  penalty_min_years_7: -8       # JD asks 7 years
-  penalty_min_years_8plus: -15  # JD asks 8+ years
+  mine: 5
+  min_accept_years: 2     # skip jobs asking for LESS than this
+  max_accept_years: 6     # skip jobs asking for MORE than this (7+, 10+ yrs are removed)
   leadership_title_words: [lead, principal, manager, director, head of, vp, staff, 리드, 팀장, 매니저]
   leadership_penalty: -6
   junior_title_words: [intern, internship, graduate, fresh, new grad, entry level, junior, 인턴, 신입]
+
+# ---------------- FRESHNESS (only recent jobs are alerted) -----------
+freshness:
+  max_age_days: 10        # jobs older than this are NEVER alerted
+  today_hours: 48         # up to 2 days  -> "APPLY TODAY" window
+  review_hours: 120       # up to 5 days  -> "REVIEW" window (5-10 days = BACKUP)
+  include_unknown_date_on_first_run: false   # jobs with no posting date are skipped on the very first run
 
 # ---------------- LANGUAGE / VISA RULES ------------------------------
 language:

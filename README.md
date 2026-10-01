@@ -10,13 +10,14 @@ alerts for NEW jobs, **freshest first**, with a score and requirement summary.
   matches (Python/Kubernetes + 3 backend skills).
 - **Score 0-100:** weighted skills (Python, Kubernetes, Terraform, CI/CD...), plus bonuses
   (English-friendly, visa support, experience fit, fresh, target company) and penalties
-  (Korean required, 7+/8+ years, lead/manager titles). Skills you lack (AWS, Helm...) show as **Gaps**.
-- **Freshness:** 🔥 <24h, 🟢 1-7d, 🟡 8-14d, 🟠 15-30d, ⚪ 30d+. Also 🚨 DEADLINE SOON (<72h), ⚠️ MAY CLOSE EARLY.
+  (Korean required, lead/manager titles). Skills you lack (AWS, Helm...) show as **Gaps**.
+- **Freshness:** only jobs posted in the last **10 days** are alerted: 🔥 <24h first, then 🟢 up to 2 days, 🟡 up to 5 days, 🟠 up to 10 days. Also 🚨 DEADLINE SOON (<72h), ⚠️ MAY CLOSE EARLY.
 - **Visa:** Confirmed / Likely / Not mentioned / Not available.
 - **Korean:** Required / Preferred / Not required / Likely needed (JD in Korean) / Not mentioned.
 - **English:** Required / Preferred / English JD / Not mentioned.
 - **Priority:** 🔥 APPLY IMMEDIATELY, 🟢 APPLY TODAY, 🟡 REVIEW, ⚪ BACKUP.
-- **Auto-excluded:** interns/juniors/0-1 yr, unrelated stacks, "no visa sponsorship",
+- **Experience:** only jobs asking **2 to 6 years** are kept (7+/10+ are removed). Change in `config.yaml`.
+- **Auto-excluded:** interns/juniors, unrelated stacks, "no visa sponsorship",
   Korean fluency explicitly mandatory (switch off in `config.yaml`).
 
 ## Files

@@ -408,16 +408,16 @@ def freshness(age_h):
     if age_h < 24:
         return "🔥", f"NEW — {age_text(age_h)}"
     d = age_h / 24
-    emoji = "🟢" if d <= 7 else "🟡" if d <= 14 else "🟠" if d <= 30 else "⚪"
+    emoji = "🟢" if d <= 2 else "🟡" if d <= 5 else "🟠"
     return emoji, age_text(age_h)
 
 
-def priority_of(age_h, score, sc):
+def priority_of(age_h, score, sc, fr):
     if age_h is not None and age_h < 24 and score >= sc["strong"]:
         return "immediate", "🔥 APPLY IMMEDIATELY"
-    if age_h is not None and age_h <= 72 and score >= sc["good"]:
+    if age_h is not None and age_h <= fr["today_hours"] and score >= sc["good"]:
         return "today", "🟢 APPLY TODAY"
-    if age_h is not None and age_h <= 168 and score >= sc["reasonable"]:
+    if age_h is not None and age_h <= fr["review_hours"] and score >= sc["reasonable"]:
         return "review", "🟡 REVIEW"
     if age_h is None and score >= sc["strong"]:
         return "review", "🟡 REVIEW"
@@ -440,10 +440,8 @@ def why_text(ev):
     m = ev["min_req"]
     if m is None:
         extras.append("No strict experience bar was found, so check the posting.")
-    elif m <= 6:
-        extras.append(f"The {m}+ year requirement fits your 4+ years.")
     else:
-        extras.append(f"The {m}+ year requirement is above your experience, so it is a stretch.")
+        extras.append(f"The {m}+ year requirement fits your {ev['mine']} years of experience.")
     return " ".join(parts + extras[:2])
 
 
@@ -500,8 +498,11 @@ def evaluate(job, cfg, now, first_run, state):
 
     # experience
     min_req = min_years(full)
-    if min_req == 0 or (min_req == 1 and re.search(r"junior|entry|신입|new grad|graduate", full, re.I)):
-        return None, "0-1 year role"
+    lo, hi = ex["min_accept_years"], ex["max_accept_years"]
+    if min_req is not None and min_req < lo:
+        return None, f"experience too low ({min_req} yr)"
+    if min_req is not None and min_req > hi:
+        return None, f"experience too high ({min_req}+ yrs)"
 
     # language / visa
     korean = korean_status(full)
@@ -518,10 +519,6 @@ def evaluate(job, cfg, now, first_run, state):
         score += 5
     if min_req is not None and 3 <= min_req <= 6:
         score += 5
-    elif min_req == 7:
-        score += ex["penalty_min_years_7"]
-    elif min_req is not None and min_req >= 8:
-        score += ex["penalty_min_years_8plus"]
     if kw_match(title, ex["leadership_title_words"]):
         score += ex["leadership_penalty"]
     if english in ("Required", "Preferred", "English JD (likely OK)") and korean in ("Not required", "Not mentioned", "Preferred"):
@@ -547,11 +544,17 @@ def evaluate(job, cfg, now, first_run, state):
         age_h = None
     else:
         age_h = 0.0  # first detected by the bot just now
+    fr = cfg["freshness"]
+    if age_h is None:
+        if not fr.get("include_unknown_date_on_first_run", False):
+            return None, "stale: no posting date on first run"
+    elif age_h > fr["max_age_days"] * 24:
+        return None, f"stale: posted {int(age_h // 24)} days ago"
     if age_h is not None:
-        score += 5 if age_h < 24 else 3 if age_h <= 72 else 0
+        score += 5 if age_h < 24 else 3 if age_h <= fr["today_hours"] else 0
     score = int(max(0, min(100, round(score))))
 
-    pri_key, pri_label = priority_of(age_h, score, sc)
+    pri_key, pri_label = priority_of(age_h, score, sc, cfg["freshness"])
 
     dl_str, dl_ts = find_deadline(full)
     badges = []
@@ -563,7 +566,7 @@ def evaluate(job, cfg, now, first_run, state):
     ev = {
         "job": job, "kind": "job", "category": category, "score": score, "age_h": age_h,
         "posted": posted, "priority": pri_key, "priority_label": pri_label,
-        "have": have, "gaps": gaps, "min_req": min_req,
+        "have": have, "gaps": gaps, "min_req": min_req, "mine": ex["mine"],
         "korean": korean, "english": english, "visa": visa,
         "deadline": dl_str, "badges": badges,
     }
@@ -704,16 +707,18 @@ def main():
     state, first_run = load_state()
     now = time.time()
 
-    evs = {}
+    evs, stale_ids = {}, []
     for job in collect(cfg, state):
         if job.get("page_change"):
             evs[job["id"]] = {"job": job, "kind": "page", "age_h": 0.0, "score": 0,
                               "priority": "review", "priority_label": "🟡 REVIEW", "posted": None}
             continue
-        ev, _ = evaluate(job, cfg, now, first_run, state)
+        ev, reason = evaluate(job, cfg, now, first_run, state)
         if ev:
             evs[job["id"]] = ev
-    log(f"Matched {len(evs)} relevant job(s).")
+        elif reason and reason.startswith("stale"):
+            stale_ids.append(job["id"])
+    log(f"Matched {len(evs)} relevant job(s) within the freshness window; {len(stale_ids)} older ones skipped.")
 
     allowed = set(cfg.get("notify", {}).get("send_priorities", ["immediate", "today", "review", "backup"]))
     new = [ev for jid, ev in evs.items() if jid not in state["jobs"] and ev["priority"] in allowed]
@@ -741,7 +746,7 @@ def main():
 
     if ok:
         stamp = int(now)
-        for jid in evs:
+        for jid in list(evs) + stale_ids:
             state["jobs"].setdefault(jid, stamp)
         cutoff = stamp - KEEP_DAYS * 86400
         state["jobs"] = {k: v for k, v in state["jobs"].items() if v >= cutoff}
