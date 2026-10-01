@@ -1,56 +1,44 @@
-# Korea DevOps Job-Alert Bot
+# Korea Job Search Agent (alert bot)
 
-Checks job boards every 30 minutes (free, via GitHub Actions) and sends you
-Telegram/email alerts for NEW jobs matching your filters. Jobs that mention
-Korean-language requirements get a ⚠️ flag; ones mentioning visa/relocation get ✅.
+Checks job boards every 30 minutes (free, GitHub Actions) and sends Telegram/email
+alerts for NEW jobs, **freshest first**, with a score and requirement summary.
 
-## Setup (about 15 minutes)
+## What it checks for every job
+- **Location:** all of South Korea (Seoul, Busan, Pangyo, Daejeon, etc.).
+- **Relevance (not just title):** title family (DevOps/SRE, Automation/Network, Backend, AI/MLOps)
+  OR strong skill match in the description. Backend titles only count if the stack
+  matches (Python/Kubernetes + 3 backend skills).
+- **Score 0-100:** weighted skills (Python, Kubernetes, Terraform, CI/CD...), plus bonuses
+  (English-friendly, visa support, experience fit, fresh, target company) and penalties
+  (Korean required, 7+/8+ years, lead/manager titles). Skills you lack (AWS, Helm...) show as **Gaps**.
+- **Freshness:** 🔥 <24h, 🟢 1-7d, 🟡 8-14d, 🟠 15-30d, ⚪ 30d+. Also 🚨 DEADLINE SOON (<72h), ⚠️ MAY CLOSE EARLY.
+- **Visa:** Confirmed / Likely / Not mentioned / Not available.
+- **Korean:** Required / Preferred / Not required / Likely needed (JD in Korean) / Not mentioned.
+- **English:** Required / Preferred / English JD / Not mentioned.
+- **Priority:** 🔥 APPLY IMMEDIATELY, 🟢 APPLY TODAY, 🟡 REVIEW, ⚪ BACKUP.
+- **Auto-excluded:** interns/juniors/0-1 yr, unrelated stacks, "no visa sponsorship",
+  Korean fluency explicitly mandatory (switch off in `config.yaml`).
 
-### 1. Create a Telegram bot (fastest alerts)
-1. In Telegram, message **@BotFather** -> `/newbot` -> copy the **bot token**.
-2. Send any message to your new bot.
-3. Open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy `"chat":{"id": ...}` = your **chat id**.
+## Files
+- `job_alert_bot.py` main bot
+- `config.yaml` all filters, skills, weights, companies, sources (edit this)
+- `check_sources.py` test a company: `python3 check_sources.py greenhouse coupang`
+- `.github/workflows/job-alerts.yml` schedule (create it on GitHub if the folder is missing)
 
-### 2. (Optional) Email via Gmail
-Enable 2-Step Verification, then create an **App Password**
-(Google Account -> Security -> App passwords). Use it as `SMTP_PASS`.
+## Setup
+1. Telegram: @BotFather -> `/newbot` -> token; message the bot; open
+   `https://api.telegram.org/bot<TOKEN>/getUpdates` for your chat id.
+2. Add GitHub secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+   (optional email: `SMTP_USER`, `SMTP_PASS`, `EMAIL_TO`).
+3. Actions tab -> Job alerts -> Run workflow.
 
-### 3. Put the project on GitHub
-Create a new repo, upload all files (including the `.github` folder).
-Public repo = unlimited free Actions minutes. Private repo = 2,000 free
-min/month, so change the cron to hourly (`0 * * * *`).
+## Covering Wanted / Saramin / JobKorea / Jumpit / LinkedIn
+They block bots, so use Google Alerts RSS (queries listed in `config.yaml`) and paste the
+feed URLs under `sources.rss`. Alerts from RSS have little text, so they are scored mostly by title.
 
-### 4. Add secrets
-Repo -> Settings -> Secrets and variables -> Actions -> New repository secret:
-
-| Secret | Value |
-|---|---|
-| `TELEGRAM_BOT_TOKEN` | from BotFather |
-| `TELEGRAM_CHAT_ID` | your chat id |
-| `SMTP_USER` | your Gmail address (optional) |
-| `SMTP_PASS` | Gmail app password (optional) |
-| `EMAIL_TO` | where to receive alerts (optional) |
-
-### 5. Run it
-Actions tab -> "Job alerts" -> **Run workflow**. Check the logs, and you should
-get your first alerts. After that it runs automatically.
-
-## Covering Wanted, Saramin, LinkedIn, JobKorea
-These sites block bots, so the bot does not scrape them. Use the Google Alerts
-RSS trick (see `config.yaml`): create alerts such as
-`site:wanted.co.kr DevOps`, `site:saramin.co.kr 데브옵스`,
-`site:linkedin.com/jobs DevOps Seoul`, set delivery to **RSS feed**, and paste
-the feed URLs under `sources.rss`. Also keep each site's own built-in alerts on.
-
-## Test locally
+## Local test
 ```
 pip install -r requirements.txt
-python job_alert_bot.py --dry-run
+python3 job_alert_bot.py --dry-run
+python3 check_sources.py
 ```
-
-## Notes
-- Company tokens in `config.yaml` must be valid; bad ones only print a warning.
-  Add more companies by finding their Greenhouse/Lever/Ashby board name.
-- If GitHub pauses the schedule after long inactivity, re-enable it in the Actions tab.
-- To be less strict, add more words to `title_include`; to be stricter, set
-  `hide_if_korean_required: true`.

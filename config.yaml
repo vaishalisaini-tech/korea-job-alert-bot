@@ -1,61 +1,293 @@
-# ---------------------------------------------------------------
-# Edit this file to control WHAT the bot looks for and WHERE.
-# ---------------------------------------------------------------
+# =====================================================================
+# Korea Job Search Agent - configuration
+# Profile: 4+ yrs DevOps / Infrastructure & Network Automation (Python,
+# Kubernetes/GKE, Terraform, CI/CD, Prometheus/Grafana, AI-SRE).
+# =====================================================================
 
-filters:
-  # Job location must contain one of these (case-insensitive)
-  locations:
+# ---------------- LOCATION: all of South Korea -----------------------
+location:
+  include:
     - korea
+    - south korea
     - seoul
-    - pangyo
-    - seongnam
     - busan
     - incheon
+    - daegu
+    - daejeon
+    - gwangju
+    - ulsan
+    - sejong
     - gyeonggi
-    - 서울
-    - 판교
+    - seongnam
+    - pangyo
+    - bundang
+    - suwon
+    - yongin
+    - gangnam
+    - jeju
     - 한국
+    - 서울
+    - 부산
+    - 인천
+    - 대구
+    - 대전
+    - 광주
+    - 울산
+    - 세종
+    - 경기
+    - 성남
+    - 판교
+    - 분당
+    - 수원
+    - 용인
 
-  # Job TITLE must contain at least one of these
-  title_include:
-    - devops
-    - sre
-    - site reliability
-    - platform engineer
-    - cloud
-    - infrastructure
-    - kubernetes
-    - automation
-    - network
-    - 데브옵스
-    - 인프라
-    - 클라우드
-    - 쿠버네티스
+# ---------------- JOB TITLE FAMILIES ---------------------------------
+# Title match = strong signal. Jobs whose title is NOT listed can still
+# match through the skills path (see scoring.skill_only_min).
+titles:
+  families:
+    devops_sre:
+      - devops
+      - sre
+      - site reliability
+      - reliability engineer
+      - platform engineer
+      - platform developer
+      - platform infrastructure
+      - infrastructure engineer
+      - infrastructure developer
+      - infrastructure automation
+      - infrastructure software engineer
+      - cloud infrastructure
+      - cloud engineer
+      - cloud platform
+      - cloud operations
+      - cloud devops
+      - cloud sre
+      - systems engineer
+      - production engineer
+      - infrastructure operations
+      - devsecops
+      - ci/cd engineer
+      - kubernetes engineer
+      - container platform
+      - software engineer - infrastructure
+      - software engineer, infrastructure
+      - software engineer - platform
+      - software engineer, platform
+      - 데브옵스
+      - 인프라
+      - 클라우드 엔지니어
+      - 쿠버네티스
+      - 플랫폼 엔지니어
+      - 시스템 엔지니어
+    automation_network:
+      - automation engineer
+      - automation developer
+      - python automation
+      - it automation
+      - network automation
+      - network devops
+      - network software
+      - network infrastructure
+      - network platform
+      - cloud network
+      - network sre
+      - network operations automation
+      - 네트워크 자동화
+      - 자동화 엔지니어
+    backend:
+      - backend engineer
+      - backend developer
+      - back-end engineer
+      - back-end developer
+      - python developer
+      - python software engineer
+      - python backend
+      - server-side
+      - api engineer
+      - api developer
+      - backend platform
+      - backend infrastructure
+      - microservices engineer
+      - backend systems
+      - distributed systems
+      - 백엔드
+      - 서버 개발
+    ai_infra:
+      - ai infrastructure
+      - ai platform
+      - ml infrastructure
+      - ml platform
+      - mlops
+      - llmops
+      - ai devops
+      - ai cloud
+      - machine learning infrastructure
+      - llm infrastructure
+      - ai sre
+      - ml devops
+      - model infrastructure
+      - model serving
 
-  # ...and none of these
-  title_exclude:
+  # Words that make a title "engineering-like" (needed for the skills path)
+  generic_words: [engineer, developer, architect, sre, programmer, software, 엔지니어, 개발자]
+
+  # Hard exclude by title
+  exclude:
     - intern
+    - internship
     - sales
     - marketing
     - recruiter
-    - director
-    - vp
-    - account
+    - account manager
     - legal
     - finance
+    - accountant
+    - designer
+    - technician
+    - test automation
+    - quality assurance
+    - qa
+    - sdet
+    - field engineer
+    - customer success
+    - 인턴
+    - 신입
+    - 영업
 
-  # true = silently hide jobs whose description says Korean is required.
-  # false (default) = still send them, but with a warning flag.
-  hide_if_korean_required: false
+# ---------------- SKILLS (semantic / skill-based matching) ------------
+skills:
+  highest: [python, kubernetes, docker, linux, cloud, terraform, ci/cd, infrastructure automation, sre, platform engineering]
+  high: [gcp, aws, azure, jenkins, gitlab ci, prometheus, grafana, alertmanager, helm, argocd, gitops, ansible, observability, microservices, rest api, fastapi, django, postgresql, mysql, pytest]
+  additional: [network automation, cisco, huawei, nokia, juniper, ssh, netmiko, network infrastructure, configuration management]
+  ai: [ai infrastructure, mlops, llm, rag, agentic, automated remediation, anomaly detection, model serving]
 
-# Max alerts sent on the very first run (so you aren't flooded)
+  # Skills the JD may want that you do NOT have yet -> shown as "gaps",
+  # and counted at half weight (related experience).
+  not_have: [aws, azure, helm, argocd, gitops, ansible, netmiko, mlops]
+
+  # Skills that decide whether a Backend-titled job is really relevant
+  backend: [python, fastapi, django, rest api, microservices, postgresql, mysql, docker, kubernetes, linux, cloud, ci/cd, distributed systems, asynchronous]
+
+  # Alternate spellings / Korean terms
+  aliases:
+    kubernetes: [k8s, gke, eks, aks, k3s, 쿠버네티스]
+    docker: [container, containers, containerization, 도커]
+    python: [파이썬]
+    linux: [ubuntu, 리눅스]
+    cloud: [gcp, aws, azure, google cloud, 클라우드]
+    terraform: [iac, infrastructure as code, opentofu, 테라폼]
+    ci/cd: [cicd, ci-cd, continuous integration, continuous delivery, continuous deployment, github actions, 지속적 통합]
+    infrastructure automation: [infrastructure as code, 인프라 자동화]
+    sre: [site reliability, 사이트 신뢰성]
+    platform engineering: [platform engineer, internal developer platform, 플랫폼 엔지니어링]
+    rest api: [restful, rest apis]
+    postgresql: [postgres]
+    prometheus: [프로메테우스]
+    grafana: [그라파나]
+    observability: [monitoring, opentelemetry, 모니터링]
+    gitlab ci: [gitlab]
+    ssh: [ssh automation]
+    configuration management: [puppet, chef, ansible]
+    mlops: [ml ops, ml platform]
+    llm: [llms, large language model, genai, generative ai]
+    rag: [retrieval augmented generation, retrieval-augmented]
+    agentic: [ai agent, ai agents, agent orchestration]
+    distributed systems: [distributed system, 분산 시스템]
+    asynchronous: [async, asyncio]
+
+# ---------------- SCORING & PRIORITY ---------------------------------
+scoring:
+  weights: {highest: 5, high: 3, additional: 2, ai: 2}
+  cap: 40                 # weighted skill points that equal 100% skill match
+  skill_only_min: 40      # min score for a job matched by skills (title not in a family)
+  skill_only_min_highest: 4   # ...and at least this many "highest" skills
+  min_skill_matches: 2    # any job must mention >= 2 of your skills (when a description exists)
+  backend_min_skills: 3   # Backend titles need >= 3 of skills.backend (incl. python or kubernetes)
+  strong: 65              # "strong technical match"
+  good: 50
+  reasonable: 35
+
+# ---------------- EXPERIENCE (yours: 4+ years) -----------------------
+experience:
+  mine: 4
+  penalty_min_years_7: -8       # JD asks 7 years
+  penalty_min_years_8plus: -15  # JD asks 8+ years
+  leadership_title_words: [lead, principal, manager, director, head of, vp, staff, 리드, 팀장, 매니저]
+  leadership_penalty: -6
+  junior_title_words: [intern, internship, graduate, fresh, new grad, entry level, junior, 인턴, 신입]
+
+# ---------------- LANGUAGE / VISA RULES ------------------------------
+language:
+  exclude_if_korean_mandatory: true   # only when Korean fluency is explicitly mandatory
+visa:
+  exclude_if_unavailable: true        # explicit "no visa sponsorship" / foreigners cannot apply
+
+# ---------------- NOTIFICATIONS --------------------------------------
+notify:
+  # which priorities to send (remove "backup" if you only want the best)
+  send_priorities: [immediate, today, review, backup]
 max_first_run_alerts: 30
 
+# Small score bonus for companies you listed as targets
+target_companies:
+  - coupang
+  - naver
+  - line
+  - kakao
+  - toss
+  - woowa
+  - musinsa
+  - kurly
+  - socar
+  - sendbird
+  - moloco
+  - krafton
+  - nexon
+  - ncsoft
+  - nhn
+  - rebellions
+  - upstage
+  - lunit
+  - furiosa
+  - nota
+  - makinarocks
+  - vuno
+  - 42dot
+  - deepx
+  - wrtn
+  - samsung
+  - lg
+  - sk
+  - kt
+  - hyundai
+  - lotte
+  - megazone
+  - bespin
+  - ericsson
+  - nokia
+  - nvidia
+  - microsoft
+  - google
+  - amazon
+  - oracle
+  - salesforce
+  - broadcom
+  - intel
+  - qualcomm
+  - sap
+  - sonatus
+  - seoul robotics
+  - config
+
+# ---------------- SOURCES --------------------------------------------
+# Test any name with:  python3 check_sources.py greenhouse <name>
 sources:
-  # Company job-board "tokens". Verify each by opening the URL in a browser, e.g.
-  #   https://boards-api.greenhouse.io/v1/boards/datadog/jobs
-  # If it returns JSON, the token is valid. Invalid ones just print a warning.
   greenhouse:
+    - coupang
+    - sonatus
+    - seoulrobotics
     - datadog
     - cloudflare
     - databricks
@@ -65,29 +297,27 @@ sources:
     - okta
     - airbnb
     - stripe
-
-  # https://api.lever.co/v0/postings/<company>?mode=json
+  # Candidates to test then add: sendbird, moloco, bearrobotics, lunit, upstage
   lever:
     - palantir
-
-  # https://api.ashbyhq.com/posting-api/job-board/<name>
   ashby: []
-
-  # https://api.smartrecruiters.com/v1/companies/<id>/postings?country=kr
   smartrecruiters: []
 
-  # Google Alerts RSS feeds (best way to cover Wanted / Saramin / LinkedIn / JobKorea):
-  #  1. google.com/alerts -> query e.g.  site:wanted.co.kr DevOps
-  #  2. "Show options" -> Deliver to: RSS feed -> Create alert
-  #  3. Right-click the RSS icon -> copy link -> paste below
+  # Google Alerts RSS (covers Wanted / Saramin / JobKorea / LinkedIn / Jumpit).
+  # 1) google.com/alerts -> query -> "Show options" -> Deliver to: RSS feed
+  # 2) copy the RSS link into the list below
+  # Suggested queries:
+  #   site:wanted.co.kr DevOps OR SRE OR "Platform Engineer"
+  #   site:saramin.co.kr 데브옵스 OR 쿠버네티스 OR SRE
+  #   site:jobkorea.co.kr 클라우드 엔지니어 OR DevOps
+  #   site:jumpit.co.kr DevOps OR 인프라
+  #   site:linkedin.com/jobs DevOps Korea
+  #   site:dev-korea.com DevOps OR Platform OR Backend
   rss: []
   #  - name: Wanted DevOps
   #    url: "https://www.google.com/alerts/feeds/XXXX/YYYY"
-  #  - name: LinkedIn Korea DevOps
-  #    url: "https://www.google.com/alerts/feeds/XXXX/ZZZZ"
 
-  # Static careers pages: bot alerts when the page text changes.
-  # Works only for pages that are NOT heavily JavaScript-rendered.
+  # Static careers pages (alerts when the page text changes)
   pages: []
-  #  - name: Some Company Careers
-  #    url: "https://example.com/careers"
+  #  - name: SAP Korea careers
+  #    url: "https://jobs.sap.com/go/Technology-Jobs-in-Seoul/918101/"
